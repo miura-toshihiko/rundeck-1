@@ -77,7 +77,7 @@
                       </li>
                     </g:if>
 
-                    <feature:enabled name="enhanced-nodes">
+                    <feature:enabled name="enhancedNodes">
 
                       <li id="tab_link_plugins">
                         <a href="#node_plugins" data-toggle="tab">
@@ -237,7 +237,7 @@
                         </div>
                       </g:if>
 
-                      <feature:enabled name="enhanced-nodes">
+                      <feature:enabled name="enhancedNodes">
                         <div class="tab-pane" id="node_plugins">
 
                               <project-plugin-config class="project-plugin-config-vue"
