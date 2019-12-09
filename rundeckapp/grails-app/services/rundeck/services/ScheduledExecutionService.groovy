@@ -828,19 +828,12 @@ class ScheduledExecutionService implements ApplicationContextAware, Initializing
                 map.remove('configuration')
             }
             if(step instanceof JobExec) {
-                ScheduledExecution refjob
+                ScheduledExecution refjob = step.findJob(project)
                 if(!step.useName && step.uuid){
-                    refjob = ScheduledExecution.findByUuid(step.uuid)
                     if(refjob) {
                         map.jobref.name = refjob.jobName
                         map.jobref.group = refjob.groupPath
                     }
-                }else{
-                    refjob = ScheduledExecution.findByProjectAndJobNameAndGroupPath(
-                            step.jobProject?step.jobProject:project,
-                            step.jobName,
-                            step.jobGroup
-                    )
                 }
 
                 if(refjob){
@@ -858,16 +851,7 @@ class ScheduledExecutionService implements ApplicationContextAware, Initializing
             def eh = step.errorHandler
 
             if(eh instanceof JobExec) {
-                ScheduledExecution refjob
-                if(!eh.useName && eh.uuid){
-                    refjob = ScheduledExecution.findByUuid(eh.uuid)
-                }else{
-                    refjob = ScheduledExecution.findByProjectAndJobNameAndGroupPath(
-                            eh.jobProject?eh.jobProject:project,
-                            eh.jobName,
-                            eh.jobGroup
-                    )
-                }
+                ScheduledExecution refjob = eh.findJob(project)
                 if(refjob){
                     map.ehJobId=refjob.extid
                     boolean doload=(null==jobids[map.ehJobId])
@@ -1966,6 +1950,11 @@ class ScheduledExecutionService implements ApplicationContextAware, Initializing
             if(!scheduledExecution.scheduled){
 
                 return [success: false, scheduledExecution: scheduledExecution,
+                         message  : lookupMessage(
+                                'api.error.job.toggleSchedule.notScheduled',
+                                ['Job ID', scheduledExecution.extid]
+                        ),
+                        status: 409,
                         errorCode: 'api.error.job.toggleSchedule.notScheduled' ]
             }
             if(frameworkService.isClusterModeEnabled()) {
@@ -2385,7 +2374,7 @@ class ScheduledExecutionService implements ApplicationContextAware, Initializing
 
             def optfailed = false
             optsmap.values().each {Option opt ->
-                EditOptsController._validateOption(opt,null,scheduledExecution.scheduled)
+                EditOptsController._validateOption(opt, null,scheduledExecution.scheduled)
                 fileUploadService.validateFileOptConfig(opt)
                 if (opt.errors.hasErrors()) {
                     optfailed = true
