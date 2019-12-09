@@ -2,7 +2,7 @@ language: java
 env: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=192m" GRADLE_OPTS="-Xmx1024m -XX:MaxPermSize=192m"
   TERM="dumb"
 jdk:
-- oraclejdk8
+- openjdk8
 sudo: required
 services:
 - docker
@@ -33,6 +33,7 @@ before_install:
 - sudo apt-get install -y jq xmlstarlet
 - sudo chsh --shell $(which bash)
 - pip install awscli --upgrade --user
+- nvm install 8 && nvm use 8
 install: true
 before_script:
 - source scripts/travis-helpers.sh
@@ -91,7 +92,7 @@ jobs:
     script:
     - script_block 'sync-artifacts' fetch_common_artifacts
     - script_block 'deb-test' 'bash test/test-docker-install-deb.sh'
-  
+
   - env: JOB='Test rpm install'
     script:
     - script_block 'sync-artifacts' fetch_common_artifacts
@@ -102,7 +103,7 @@ jobs:
     - script_block 'sync-artifacts' fetch_common_artifacts
     - script_block 'docker.pull' pull_rdtest
     - script_block 'docker-test' 'bash test/run-docker-tests.sh'
-  
+
   - env: JOB='Docker SSL tests'
     script:
     - script_block 'sync-artifacts' fetch_common_artifacts
@@ -133,10 +134,10 @@ jobs:
     - script_block 'docker.pull' pull_rdtest
     - script_block 'docker-pam-test' 'bash test/run-docker-pam-tests.sh'
 
-  - env: JOB='Docker Selenium tests'
-    script:
-    - script_block 'docker.pull' pull_rundeck
-    - script_block 'selenium' 'bash test/selenium/travis.sh'
+  # - env: JOB='Docker Selenium tests'
+  #   script:
+  #   - script_block 'docker.pull' pull_rundeck
+  #   - script_block 'selenium' 'bash test/selenium/travis.sh'
 
   # # Stage: snapshot release publishes snapshot artifacts to external repositories
   - stage: snapshot release
